@@ -1,0 +1,42 @@
+[
+    {
+        "id": "1",
+        "title": "Composting 101",
+        "description": "Learn the basics of composting food scraps to reduce waste and create nutrient-rich soil.",
+        "category": "Waste Reduction",
+        "type": "Article",
+        "url": "https://www.epa.gov/recycle/composting-home"
+    },
+    {
+        "id": "2",
+        "title": "Seasonal Food Guide",
+        "description": "Find out what produce is in season near you to support local farmers and reduce carbon footprint.",
+        "category": "Sustainable Shopping",
+        "type": "Tool",
+        "url": "https://www.seasonalfoodguide.org/"
+    },
+    {
+        "id": "3",
+        "title": "Zero Waste Kitchen Tips",
+        "description": "Simple swaps and habits to minimize plastic and food waste in your kitchen.",
+        "category": "Lifestyle",
+        "type": "Video",
+        "url": "https://www.youtube.com/watch?v=pF72px2R3Hg"
+    },
+    {
+        "id": "4",
+        "title": "Understanding Food Labels",
+        "description": "Decode expiration dates (Sell By, Use By, Best By) to stop throwing away good food.",
+        "category": "Education",
+        "type": "Guide",
+        "url": "https://www.fda.gov/consumers/consumer-updates/confused-date-labels-packaged-foods"
+    },
+    {
+        "id": "5",
+        "title": "Meal Planning for Beginners",
+        "description": "How to plan your meals to save money and reduce food spoilage.",
+        "category": "Planning",
+        "type": "Article",
+        "url": "https://www.thekitchn.com/the-beginners-guide-to-meal-planning-what-to-know-how-to-succeed-and-what-to-skip-242413"
+    }
+]
