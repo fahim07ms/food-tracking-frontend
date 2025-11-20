@@ -19,6 +19,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function DashboardLayout({
     children,
@@ -87,7 +88,7 @@ export default function DashboardLayout({
 
     // If on onboarding page but has profile, redirect to dashboard
     if (isAuthenticated && hasHealthProfile && pathname === "/onboarding") {
-        router.push("/");
+        router.push("/dashboard");
         return null;
     }
 
@@ -106,7 +107,7 @@ export default function DashboardLayout({
     };
 
     const navigation = [
-        { name: "Dashboard", href: "/", icon: LayoutDashboard },
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "Food Logs", href: "/food-logs", icon: Utensils },
         { name: "Inventory", href: "/inventory", icon: Package },
         { name: "Resources", href: "/resources", icon: Leaf },
@@ -117,13 +118,19 @@ export default function DashboardLayout({
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
             {/* Desktop Sidebar */}
-            <aside className="hidden w-64 flex-col border-r bg-background md:flex">
-                <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <aside className="hidden w-64 flex-col border-r border-r-chart-5/50 bg-background md:flex">
+                <div className="flex h-14 items-center border-b border-b-chart-5/50 px-4 lg:h-[60px] lg:px-6">
                     <Link
                         href="/"
                         className="flex items-center gap-2 font-semibold"
                     >
-                        <Utensils className="h-6 w-6" />
+                        <Image
+                            src="/logo.png"
+                            alt="Poriman Logo"
+                            width={50}
+                            height={50}
+                            className="rounded-full"
+                        />
                         <span className="">Poriman</span>
                     </Link>
                 </div>
@@ -148,7 +155,7 @@ export default function DashboardLayout({
                         })}
                     </nav>
                 </div>
-                <div className="mt-auto p-4 border-t">
+                <div className="mt-auto p-4 border-t border-t-chart-5/50">
                     <div className="flex items-center gap-3 px-3 py-2 mb-2">
                         <div className="flex flex-col">
                             <span className="text-sm font-medium">
@@ -172,7 +179,7 @@ export default function DashboardLayout({
 
             {/* Mobile Header */}
             <div className="flex flex-col flex-1">
-                <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 md:hidden">
+                <header className="flex h-14 items-center gap-4 border-b border-b-chart-5/50 bg-background px-4 lg:h-[60px] lg:px-6 md:hidden">
                     <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
                         <SheetTrigger asChild>
                             <Button
@@ -187,14 +194,22 @@ export default function DashboardLayout({
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col">
-                            <nav className="grid gap-2 text-lg font-medium">
+                            <nav className="grid gap-2 text-lg font-medium px-5">
                                 <Link
                                     href="/"
                                     className="flex items-center gap-2 text-lg font-semibold mb-4"
                                     onClick={() => setIsMobileOpen(false)}
                                 >
-                                    <Utensils className="h-6 w-6" />
-                                    <span className="sr-only">Poriman</span>
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Poriman Logo"
+                                        width={50}
+                                        height={50}
+                                        className="rounded-full"
+                                    />
+                                    <span className="text-2xl font-bold text-primary">
+                                        Poriman
+                                    </span>
                                 </Link>
                                 {navigation.map((item) => {
                                     const Icon = item.icon;

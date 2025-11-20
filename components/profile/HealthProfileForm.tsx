@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,17 +25,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    updateHealthProfileSchema,
-    UpdateHealthProfileInput,
-} from "@/lib/schemas";
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { updateHealthProfileSchema, UpdateHealthProfileInput } from "@/lib/schemas";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
@@ -45,9 +43,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
     const form = useForm<UpdateHealthProfileInput>({
         resolver: zodResolver(updateHealthProfileSchema) as any,
         defaultValues: {
-            birth_date: initialData?.birth_date
-                ? new Date(initialData.birth_date)
-                : undefined,
+            birth_date: initialData?.birth_date ? new Date(initialData.birth_date) : undefined,
             gender: initialData?.gender || "male",
             height_cm: initialData?.height_cm || 0,
             current_weight_kg: initialData?.current_weight_kg || 0,
@@ -76,9 +72,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
             toast.success("Health profile updated successfully");
         } catch (error: any) {
             console.error(error);
-            toast.error(
-                error.response?.data?.message || "Failed to update profile",
-            );
+            toast.error(error.response?.data?.message || "Failed to update profile");
         } finally {
             setIsLoading(false);
         }
@@ -94,34 +88,38 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="birth_date"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex flex-col">
                                         <FormLabel>Date of Birth</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="date"
-                                                value={
-                                                    field.value
-                                                        ? new Date(field.value)
-                                                              .toISOString()
-                                                              .split("T")[0]
-                                                        : ""
-                                                }
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        e.target.valueAsDate,
-                                                    )
-                                                }
-                                            />
-                                        </FormControl>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                                                    >
+                                                        {field.value ? format(field.value, "PPP") : "Pick a date"}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    initialFocus
+                                                    captionLayout="dropdown"
+                                                    fromYear={1940}
+                                                    toYear={new Date().getFullYear()}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -132,22 +130,15 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Gender</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                        >
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select gender" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="male">
-                                                    Male
-                                                </SelectItem>
-                                                <SelectItem value="female">
-                                                    Female
-                                                </SelectItem>
+                                                <SelectItem value="male">Male</SelectItem>
+                                                <SelectItem value="female">Female</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -164,11 +155,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                             <Input
                                                 type="number"
                                                 {...field}
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        e.target.valueAsNumber,
-                                                    )
-                                                }
+                                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -185,11 +172,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                             <Input
                                                 type="number"
                                                 {...field}
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        e.target.valueAsNumber,
-                                                    )
-                                                }
+                                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -199,9 +182,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                         </div>
 
                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium">
-                                Body Composition
-                            </h3>
+                            <h3 className="text-lg font-medium">Body Composition</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
@@ -210,20 +191,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                         <FormItem>
                                             <FormLabel>Body Fat %</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -236,20 +204,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                         <FormItem>
                                             <FormLabel>Waist (cm)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -262,20 +217,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                         <FormItem>
                                             <FormLabel>Hip (cm)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -288,20 +230,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                         <FormItem>
                                             <FormLabel>Neck (cm)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -311,38 +240,32 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                         </div>
 
                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium">
-                                Activity & Sleep
-                            </h3>
+                            <h3 className="text-lg font-medium">Activity & Sleep</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
                                     name="activity_level_factor"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Activity Factor
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                1.2 (Sedentary) to 1.9 (Extra
-                                                Active)
-                                            </FormDescription>
+                                            <FormLabel>Activity Level</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => field.onChange(parseFloat(value))}
+                                                value={field.value?.toString()}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select activity level" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="1.2">Sedentary (little or no exercise)</SelectItem>
+                                                    <SelectItem value="1.375">Lightly Active (exercise 1-3 days/week)</SelectItem>
+                                                    <SelectItem value="1.55">Moderately Active (exercise 3-5 days/week)</SelectItem>
+                                                    <SelectItem value="1.725">Very Active (exercise 6-7 days/week)</SelectItem>
+                                                    <SelectItem value="1.9">Extra Active (very intense exercise daily)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>Choose your typical activity level</FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -352,23 +275,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="steps_daily_average"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Daily Steps (Avg)
-                                            </FormLabel>
+                                            <FormLabel>Daily Steps (Avg)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -379,24 +288,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="sleep_hours_average"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Sleep Hours (Avg)
-                                            </FormLabel>
+                                            <FormLabel>Sleep Hours (Avg)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -413,23 +307,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="blood_glucose_fasting"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Fasting Glucose (mg/dL)
-                                            </FormLabel>
+                                            <FormLabel>Fasting Glucose (mg/dL)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -442,20 +322,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                         <FormItem>
                                             <FormLabel>HbA1c (%)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -466,23 +333,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="blood_pressure_systolic"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Systolic BP (mmHg)
-                                            </FormLabel>
+                                            <FormLabel>Systolic BP (mmHg)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -493,23 +346,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="blood_pressure_diastolic"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                Diastolic BP (mmHg)
-                                            </FormLabel>
+                                            <FormLabel>Diastolic BP (mmHg)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -520,24 +359,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="cholesterol_ldl"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                LDL Cholesterol (mg/dL)
-                                            </FormLabel>
+                                            <FormLabel>LDL Cholesterol (mg/dL)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -548,24 +372,9 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                                     name="cholesterol_hdl"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>
-                                                HDL Cholesterol (mg/dL)
-                                            </FormLabel>
+                                            <FormLabel>HDL Cholesterol (mg/dL)</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    step="0.1"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target.value
-                                                                ? e.target
-                                                                      .valueAsNumber
-                                                                : undefined,
-                                                        )
-                                                    }
-                                                    value={field.value || ""}
-                                                />
+                                                <Input type="number" step="0.1" {...field} onChange={(e) => field.onChange(e.target.value ? e.target.valueAsNumber : undefined)} value={field.value || ''} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -575,9 +384,7 @@ export function HealthProfileForm({ initialData }: { initialData?: any }) {
                         </div>
 
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading && (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            )}
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Save Health Profile
                         </Button>
                     </form>

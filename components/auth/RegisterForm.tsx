@@ -50,7 +50,7 @@ export function RegisterForm() {
             const response = await api.post("/auth/register", data);
             login(response.data.user);
             toast.success("Account created successfully");
-            router.push("/");
+            router.push("/onboarding");
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to register");

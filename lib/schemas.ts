@@ -28,7 +28,7 @@ export const updateHealthProfileSchema = z.object({
     hip_circumference_cm: z.number().optional(),
     neck_circumference_cm: z.number().optional(),
 
-    activity_level_factor: z.number().optional(),
+    activity_level_factor: z.number().positive("Activity level is required"),
     steps_daily_average: z.number().int().optional(),
     sleep_hours_average: z.number().optional(),
 
@@ -40,9 +40,7 @@ export const updateHealthProfileSchema = z.object({
     cholesterol_hdl: z.number().optional(),
 });
 
-export type UpdateHealthProfileInput = z.infer<
-    typeof updateHealthProfileSchema
->;
+export type UpdateHealthProfileInput = z.infer<typeof updateHealthProfileSchema>;
 
 export const updateProfileSchema = z
     .object({
@@ -52,17 +50,17 @@ export const updateProfileSchema = z
     })
     .refine(
         (data) => !!data.fullName || !!data.newPassword,
-        "fullName or newPassword must be provided",
+        "fullName or newPassword must be provided"
     )
     .refine(
         (data) => !data.newPassword || !!data.currentPassword,
-        "currentPassword is required when changing password",
+        "currentPassword is required when changing password"
     );
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
 export const addFoodLogSchema = z.object({
-    date: z.coerce.date(),
+    date: z.date(),
     time: z.string().min(1, "Time is required"),
     foodItemId: z.string().min(1, "Food item is required"),
     quantity: z.number().positive("Quantity must be positive"),
@@ -96,11 +94,9 @@ const activityLevelEnum = z.enum([
 ]);
 
 export const createGoalSchema = z.object({
-    primary_goals: z
-        .array(primaryGoalEnum)
-        .nonempty("Select at least one primary goal"),
-    secondary_goals: z.array(secondaryGoalEnum).optional().default([]),
-    allergies: z.array(z.string()).optional().default([]),
+    primary_goals: z.array(primaryGoalEnum).nonempty("Select at least one primary goal"),
+    secondary_goals: z.array(secondaryGoalEnum).optional(),
+    allergies: z.array(z.string()).optional(),
     activity_level: activityLevelEnum,
     target_weight_kg: z.number().positive("Target weight must be positive"),
     current_weight_kg: z.number().positive("Current weight must be positive"),
@@ -127,18 +123,24 @@ export type SetCurrentGoalInput = z.infer<typeof setCurrentGoalSchema>;
 
 // --- Food & Inventory Schemas ---
 export const createFoodItemSchema = z.object({
+    // Basic info
     name: z.string().min(1, "Name is required"),
     slug: z.string().min(1, "Slug is required"),
     description: z.string().optional(),
+
+    // Measurement & serving logic
     serving_quantity: z.number().positive(),
     serving_unit: z.string().min(1),
     serving_weight_grams: z.number().positive(),
-    metric_serving_amount: z.number().positive().default(100),
-    metric_serving_unit: z.string().min(1).default("g"),
+    metric_serving_amount: z.number().positive(),
+    metric_serving_unit: z.string().min(1),
+
+    // Nutritional data (normalized, usually per 100g / 100ml)
     calories: z.number(),
     protein: z.number(),
     carbohydrate: z.number(),
     fat_total: z.number(),
+
     fiber: z.number().optional(),
     sugar_total: z.number().optional(),
     sugar_added: z.number().optional(),
@@ -147,6 +149,7 @@ export const createFoodItemSchema = z.object({
     sodium: z.number().optional(),
     cholesterol: z.number().optional(),
     potassium: z.number().optional(),
+
     vitamin_a: z.number().optional(),
     vitamin_c: z.number().optional(),
     vitamin_d: z.number().optional(),
@@ -154,10 +157,19 @@ export const createFoodItemSchema = z.object({
     iron: z.number().optional(),
     magnesium: z.number().optional(),
     zinc: z.number().optional(),
-    tags: z.array(z.string()).optional().default([]),
-    allergens: z.array(z.string()).optional().default([]),
-    source: z.string().optional().default("User_Submission"),
-    inventoryId: z.string().min(1).optional(),
+
+    // Expiration info
+    expiration_hours: z.number().positive(),
+
+    // Image
+    image_url: z.string().url().optional().or(z.literal("")),
+
+    tags: z.array(z.string()).optional(),
+    allergens: z.array(z.string()).optional(),
+    source: z.string().optional(),
+
+    // Optional: add to user's inventory immediately after creation
+    addToInventory: z.boolean().optional(),
 });
 
 export type CreateFoodItemInput = z.infer<typeof createFoodItemSchema>;
@@ -165,12 +177,6 @@ export type CreateFoodItemInput = z.infer<typeof createFoodItemSchema>;
 export const updateFoodItemSchema = createFoodItemSchema.partial();
 
 export type UpdateFoodItemInput = z.infer<typeof updateFoodItemSchema>;
-
-export const createInventorySchema = z.object({
-    name: z.string().min(1, "Name is required"),
-});
-
-export type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 
 export const updateInventorySchema = z.object({
     name: z.string().min(1).optional(),
@@ -183,6 +189,39 @@ export const addInventoryItemSchema = z.object({
 });
 
 export type AddInventoryItemInput = z.infer<typeof addInventoryItemSchema>;
+
+// --- Resource Schemas ---
+export const createResourceSchema = z.object({
+    title: z.string().min(1, "Title is required").trim(),
+    tags: z.array(z.string()).default([]),
+    content: z.string().min(1, "Content is required"),
+    video_url: z.string().url("Invalid URL format").optional(),
+    type: z.enum(["article", "video"], {
+        message: "Type must be either 'article' or 'video'",
+    }),
+});
+
+export type CreateResourceInput = z.infer<typeof createResourceSchema>;
+
+export const updateResourceSchema = z.object({
+    title: z.string().min(1, "Title is required").trim().optional(),
+    tags: z.array(z.string()).optional(),
+    content: z.string().min(1, "Content is required").optional(),
+    video_url: z.string().url("Invalid URL format").optional().nullable(),
+    type: z.enum(["article", "video"]).optional(),
+});
+
+export type UpdateResourceInput = z.infer<typeof updateResourceSchema>;
+
+export const getResourcesQuerySchema = z.object({
+    type: z.enum(["article", "video"]).optional(),
+    tag: z.string().optional(),
+    search: z.string().optional(),
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(10),
+});
+
+export type GetResourcesQueryInput = z.infer<typeof getResourcesQuerySchema>;
 
 // --- Mock Upload Schema ---
 export const mockUploadSchema = z.object({

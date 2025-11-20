@@ -5,6 +5,7 @@ interface User {
     id: string;
     fullName: string;
     email: string;
+    image_url?: string;
     healthProfile?: {
         birth_date?: string;
         gender?: string;
@@ -36,6 +37,6 @@ export const useAuthStore = create<AuthState>()(
         }),
         {
             name: "auth-storage",
-        },
-    ),
+        }
+    )
 );

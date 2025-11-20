@@ -4,8 +4,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, ChevronRight, ChevronLeft } from "lucide-react";
+import {
+    Loader2,
+    ChevronRight,
+    ChevronLeft,
+    Calendar as CalendarIcon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +38,12 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import {
     updateHealthProfileSchema,
     UpdateHealthProfileInput,
@@ -56,6 +68,11 @@ const steps = [
         title: "Weight",
         description: "What is your current weight?",
     },
+    {
+        id: "activity_level_factor",
+        title: "Activity Level",
+        description: "How active are you on a typical day?",
+    },
 ];
 
 export function HealthProfileWizard() {
@@ -72,6 +89,7 @@ export function HealthProfileWizard() {
             birth_date: undefined,
             height_cm: undefined,
             current_weight_kg: undefined,
+            activity_level_factor: undefined,
         },
     });
 
@@ -102,7 +120,7 @@ export function HealthProfileWizard() {
             const response = await api.put("/user/health-profile", data);
             updateUser({ healthProfile: response.data.user.healthProfile });
             toast.success("Health profile created successfully!");
-            router.push("/");
+            router.push("/dashboard");
         } catch (error: any) {
             console.error(error);
             toast.error(
@@ -133,28 +151,42 @@ export function HealthProfileWizard() {
                                     control={form.control}
                                     name="birth_date"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormLabel>Date of Birth</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="date"
-                                                    value={
-                                                        field.value
-                                                            ? new Date(
-                                                                  field.value,
-                                                              )
-                                                                  .toISOString()
-                                                                  .split("T")[0]
-                                                            : ""
-                                                    }
-                                                    onChange={(e) =>
-                                                        field.onChange(
-                                                            e.target
-                                                                .valueAsDate,
-                                                        )
-                                                    }
-                                                />
-                                            </FormControl>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant="outline"
+                                                            className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                                                        >
+                                                            {field.value
+                                                                ? format(
+                                                                      field.value,
+                                                                      "PPP",
+                                                                  )
+                                                                : "Pick a date"}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={
+                                                            field.onChange
+                                                        }
+                                                        initialFocus
+                                                        captionLayout="dropdown"
+                                                        fromYear={1940}
+                                                        toYear={new Date().getFullYear()}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -238,6 +270,57 @@ export function HealthProfileWizard() {
                                                     }
                                                 />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+
+                            {currentStep === 4 && (
+                                <FormField
+                                    control={form.control}
+                                    name="activity_level_factor"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Activity Level
+                                            </FormLabel>
+                                            <Select
+                                                onValueChange={(value) =>
+                                                    field.onChange(
+                                                        parseFloat(value),
+                                                    )
+                                                }
+                                                value={field.value?.toString()}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select your activity level" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="1.2">
+                                                        Sedentary (little or no
+                                                        exercise)
+                                                    </SelectItem>
+                                                    <SelectItem value="1.375">
+                                                        Lightly Active (exercise
+                                                        1-3 days/week)
+                                                    </SelectItem>
+                                                    <SelectItem value="1.55">
+                                                        Moderately Active
+                                                        (exercise 3-5 days/week)
+                                                    </SelectItem>
+                                                    <SelectItem value="1.725">
+                                                        Very Active (exercise
+                                                        6-7 days/week)
+                                                    </SelectItem>
+                                                    <SelectItem value="1.9">
+                                                        Extra Active (very
+                                                        intense exercise daily)
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                             <FormMessage />
                                         </FormItem>
                                     )}

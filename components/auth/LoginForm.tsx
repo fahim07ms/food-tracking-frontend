@@ -49,7 +49,7 @@ export function LoginForm() {
             const response = await api.post("/auth/login", data);
             login(response.data.user);
             toast.success("Logged in successfully");
-            router.push("/");
+            router.push("/dashboard");
         } catch (error: any) {
             console.error(error);
             toast.error(error.response?.data?.message || "Failed to login");
