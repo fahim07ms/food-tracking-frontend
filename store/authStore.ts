@@ -1,13 +1,25 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { User } from '@/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface User {
+    id: string;
+    fullName: string;
+    email: string;
+    healthProfile?: {
+        birth_date?: string;
+        gender?: string;
+        height_cm?: number;
+        current_weight_kg?: number;
+        [key: string]: any;
+    };
+}
 
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     login: (user: User) => void;
     logout: () => void;
-    updateUser: (user: Partial<User>) => void;
+    updateUser: (updates: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
                 })),
         }),
         {
-            name: 'food-tracking-auth',
-        }
-    )
+            name: "auth-storage",
+        },
+    ),
 );
