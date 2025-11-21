@@ -13,6 +13,8 @@ import {
     Package,
     Leaf,
     ScanLine,
+    MessageSquare,
+    UtensilsCrossed,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -113,6 +115,7 @@ export default function DashboardLayout({
     const navigation = [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "Food Logs", href: "/food-logs", icon: Utensils },
+        { name: "Meal Plan", href: "/meal-plan", icon: UtensilsCrossed },
         { name: "Inventory", href: "/inventory", icon: Package },
         { name: "Resources", href: "/resources", icon: Leaf },
         { name: "Goals", href: "/goals", icon: Target },
