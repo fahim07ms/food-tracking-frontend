@@ -22,6 +22,7 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import Image from "next/image";
 import { AIInventoryUploadModal } from "@/components/inventory/AIInventoryUploadModal";
+import { FloatingChatButton } from "@/components/chat/FloatingChatButton";
 
 export default function DashboardLayout({
     children,
@@ -145,11 +146,10 @@ export default function DashboardLayout({
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                                        pathname === item.href
-                                            ? "bg-muted text-primary"
-                                            : "text-muted-foreground"
-                                    }`}
+                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${pathname === item.href
+                                        ? "bg-muted text-primary"
+                                        : "text-muted-foreground"
+                                        }`}
                                 >
                                     <Icon className="h-4 w-4" />
                                     {item.name}
@@ -231,11 +231,10 @@ export default function DashboardLayout({
                                             onClick={() =>
                                                 setIsMobileOpen(false)
                                             }
-                                            className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${
-                                                pathname === item.href
-                                                    ? "bg-muted text-foreground"
-                                                    : "text-muted-foreground"
-                                            }`}
+                                            className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground ${pathname === item.href
+                                                ? "bg-muted text-foreground"
+                                                : "text-muted-foreground"
+                                                }`}
                                         >
                                             <Icon className="h-5 w-5" />
                                             {item.name}
@@ -280,6 +279,8 @@ export default function DashboardLayout({
                 open={isAIUploadModalOpen}
                 onOpenChange={setIsAIUploadModalOpen}
             />
+
+            <FloatingChatButton />
         </div>
     );
 }

@@ -227,3 +227,17 @@ export type GetResourcesQueryInput = z.infer<typeof getResourcesQuerySchema>;
 export const mockUploadSchema = z.object({
     file: z.instanceof(File, { message: "File is required" }),
 });
+
+// --- Chat Schemas ---
+export const createChatSessionSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    systemInstruction: z.string().optional(),
+});
+
+export type CreateChatSessionInput = z.infer<typeof createChatSessionSchema>;
+
+export const sendChatMessageSchema = z.object({
+    message: z.string().min(1, "Message cannot be empty"),
+});
+
+export type SendChatMessageInput = z.infer<typeof sendChatMessageSchema>;
