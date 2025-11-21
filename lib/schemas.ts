@@ -250,3 +250,22 @@ export const generateMealPlanSchema = z.object({
 });
 
 export type GenerateMealPlanInput = z.infer<typeof generateMealPlanSchema>;
+
+// Analytics Schemas
+export const singleDayAnalyticsSchema = z.object({
+    date: z.string(),
+});
+
+export const weeklyAnalyticsSchema = z.object({
+    startDate: z.string(),
+});
+
+export const monthlyAnalyticsSchema = z.object({
+    year: z.number().int().min(2000).max(2100),
+    month: z.number().int().min(1).max(12),
+});
+
+export type SingleDayAnalyticsInput = z.infer<typeof singleDayAnalyticsSchema>;
+export type WeeklyAnalyticsInput = z.infer<typeof weeklyAnalyticsSchema>;
+export type MonthlyAnalyticsInput = z.infer<typeof monthlyAnalyticsSchema>;
+

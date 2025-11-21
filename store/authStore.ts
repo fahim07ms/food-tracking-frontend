@@ -13,6 +13,8 @@ interface User {
         current_weight_kg?: number;
         [key: string]: any;
     };
+    goals?: any[];
+    current_goal_index?: number;
 }
 
 interface AuthState {
