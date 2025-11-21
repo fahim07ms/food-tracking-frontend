@@ -71,6 +71,7 @@ export function UserProfileForm({ initialData }: { initialData?: any }) {
             toast.success("Profile picture updated successfully");
         } catch (error: any) {
             console.error(error);
+            for (error of error.response?.data?.errors || []) console.error(error.msg);
             toast.error(error.response?.data?.message || "Failed to upload image");
         } finally {
             setIsUploadingImage(false);

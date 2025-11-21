@@ -12,6 +12,7 @@ import {
     Menu,
     Package,
     Leaf,
+    ScanLine,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Image from "next/image";
+import { AIInventoryUploadModal } from "@/components/inventory/AIInventoryUploadModal";
 
 export default function DashboardLayout({
     children,
@@ -31,6 +33,7 @@ export default function DashboardLayout({
     const { isAuthenticated, logout, user, login } = useAuthStore();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAIUploadModalOpen, setIsAIUploadModalOpen] = useState(false);
 
     // Verify authentication with backend on mount
     useEffect(() => {
@@ -153,6 +156,14 @@ export default function DashboardLayout({
                                 </Link>
                             );
                         })}
+                        <Button
+                            variant="default"
+                            className="mt-4 mx-2 justify-start gap-3"
+                            onClick={() => setIsAIUploadModalOpen(true)}
+                        >
+                            <ScanLine className="h-4 w-4" />
+                            Scan Food
+                        </Button>
                     </nav>
                 </div>
                 <div className="mt-auto p-4 border-t border-t-chart-5/50">
@@ -232,8 +243,19 @@ export default function DashboardLayout({
                                     );
                                 })}
                                 <Button
+                                    variant="default"
+                                    className="mx-[-0.65rem] justify-start gap-4 px-3 py-2 mt-4"
+                                    onClick={() => {
+                                        setIsAIUploadModalOpen(true);
+                                        setIsMobileOpen(false);
+                                    }}
+                                >
+                                    <ScanLine className="h-5 w-5" />
+                                    Scan Food
+                                </Button>
+                                <Button
                                     variant="ghost"
-                                    className="justify-start gap-4 px-3 py-2 mt-4"
+                                    className="justify-start gap-4 px-3 py-2 mt-2"
                                     onClick={() => {
                                         handleLogout();
                                         setIsMobileOpen(false);
@@ -253,6 +275,11 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
+
+            <AIInventoryUploadModal
+                open={isAIUploadModalOpen}
+                onOpenChange={setIsAIUploadModalOpen}
+            />
         </div>
     );
 }
